@@ -1,0 +1,62 @@
+\documentclass[11pt]{article}
+
+\def\mainroot{ell_1}
+
+\usepackage[top=1in, bottom=1in, left=1in, right=1in]{geometry}
+
+\usepackage[compact]{titlesec}
+
+\usepackage{xcolor}
+\definecolor{pykeyword}{HTML}{000088}
+\definecolor{pyidentifier}{HTML}{000000}
+\definecolor{pystring}{HTML}{008800}
+\definecolor{pynumber}{HTML}{FF4000}
+\definecolor{pycomment}{HTML}{880000}
+
+\usepackage{listings}
+\lstset{language=Python,
+	basicstyle=\ttfamily\small,
+	tabsize=4,
+	showstringspaces=false,
+	keywordstyle=\color{pykeyword},
+	identifierstyle=\color{pyidentifier},
+	stringstyle=\color{pystring},
+	numberstyle=\color{pynumber},
+	commentstyle=\color{pycomment}
+}
+
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+
+\usepackage{graphicx}
+
+\title{CSE 537 Assignment 5 Report: ML Classifiers}
+
+\author{
+Remy Oukaour \\
+	{\small SBU ID: 107122849}\\
+	{\small \texttt{remy.oukaour@gmail.com}}
+\and
+Jian Yang \\
+	{\small SBU ID: 110168771}\\
+	{\small \texttt{jian.yang.1@stonybrook.edu}}
+}
+
+\date{Wednesday, December 9, 2015}
+
+\raggedbottom
+
+\begin{document}
+
+\maketitle
+
+\section{Introduction}
+
+This report describes our submission for assignment 5 in the CSE 537 course on
+artificial intelligence. Assignment 5 requires us to implement two kinds of
+machine learning classifiers: a decision tree classifier for predicting credit
+worthiness of applicants, and a na{\"i}ve Bayes classifier for classifying
+handwritten digits. In this report, we discuss the implementation details and
+performance of our solutions.
+
+\end{document}
