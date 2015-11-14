@@ -12,19 +12,19 @@ Classification = namedtuple('Classification', ['predicted', 'true'])
 class NaiveBayesClassifier(object):
 
 	def __init__(self):
-		self.corpus_count = 0
-		self.label_count = defaultdict(lambda: 0)
-		self.feature_count = defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: 0)))
+		self.num_data = 0
+		self.num_data_labeled = defaultdict(lambda: 0)
+		self.num_feature_values_labeled = defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: 0)))
 
 	def labels(self):
-		return sorted(self.label_count.keys())
+		return sorted(self.num_data_labeled.keys())
 
 	def train(self, data):
 		for datum in data:
-			self.corpus_count += 1
-			self.label_count[datum.label] += 1
+			self.num_data += 1
+			self.num_data_labeled[datum.label] += 1
 			for i, v in enumerate(datum.features):
-				self.feature_count[datum.label][i][v] += 1
+				self.num_feature_values_labeled[i][v][datum.label] += 1
 
 	def classify(self, data):
 		for datum in data:
@@ -35,27 +35,27 @@ class NaiveBayesClassifier(object):
 		return max(self.labels(), key=lambda label: self.log_posterior(features, label))
 
 	def log_prior(self, label):
-		# P(label) = # label / # all labels in training set
-		# log P(label) = log # label - log # all labels in training set
-		return log(self.label_count[label]) - log(self.corpus_count)
+		# P(label) = # data with label / # data
+		# log P(label) = log # data with label - log # data
+		return log(self.num_data_labeled[label]) - log(self.num_data)
 
 	def log_posterior(self, features, label):
-		# P(features|label) = P(label) * P(label|features) / P(label)
-		# log P(features|label) = log P(label) + log P(label|features) - log P(label)
-		# (we leave out the evidence value, P(label), since it is constant)
-		return self.log_prior(label) + self.log_likelihood(label, features)
+		# P(label|features) = P(label) * P(features|label) / P(features)
+		# log P(label|features) = log P(label) + log P(features|label) - log P(features)
+		# (we leave out the evidence value, P(features), since it is constant)
+		return self.log_prior(label) + self.log_likelihood(features, label)
 
-	def log_likelihood(self, label, features):
-		# P(label|features) = product(P(label|feature value) for each feature)
-		# log P(label|features) = sum(log P(label|feature value) for each feature)
-		return sum(self.log_feature_likelihood(label, i, v) for i, v in enumerate(features))
+	def log_likelihood(self, features, label):
+		# P(features|label) = product(P(feature value|label) for each feature)
+		# log P(features|label) = sum(log P(feature value|label) for each feature)
+		return sum(self.log_feature_likelihood(i, v, label) for i, v in enumerate(features))
 
-	def log_feature_likelihood(self, label, i, v):
-		# P(label|feature value) = # value / # all values for feature
-		# log P(label|feature value) = log # value - log # all values for feature
+	def log_feature_likelihood(self, i, v, label):
+		# P(feature value|label) = # data with label where feature has value / # data with label
+		# log P(feature value|label) = log # data with label where feature has value - log # data with label
 		# (we use Laplace smoothing, adding 1 to the numerator and denominator,
 		# to handle zero counts (particularly since log 0 = -infinity))
-		return log1p(self.feature_count[label][i][v]) - log1p(self.label_count[label])
+		return log1p(self.num_feature_values_labeled[i][v][label]) - log1p(self.num_data_labeled[label])
 
 def digit_data(label_filename, feature_filename):
 	with open(label_filename, 'r') as label_file, open(feature_filename, 'r') as feature_file:
