@@ -53,8 +53,8 @@ class NaiveBayesClassifier(object):
 	def log_feature_likelihood(self, i, v, label):
 		# P(feature value|label) = # data with label where feature has value / # data with label
 		# log P(feature value|label) = log # data with label where feature has value - log # data with label
-		# (we use Laplace smoothing, adding 1 to the numerator and denominator,
-		# to handle zero counts (particularly since log 0 = -infinity))
+		# (we use Laplace smoothing, adding 1 to the numerator and denominator, to handle zero counts;
+		# this avoids errors due to log(0) being undefined)
 		return log1p(self.num_feature_values_labeled[i][v][label]) - log1p(self.num_data_labeled[label])
 
 def digit_data(label_filename, feature_filename):
