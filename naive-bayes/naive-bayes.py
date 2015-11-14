@@ -13,31 +13,26 @@ class NaiveBayesClassifier(object):
 
 	def __init__(self):
 		self.num_data = 0
-		self.num_data_labeled = defaultdict(lambda: 0)
-		self.num_feature_values_labeled = defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: 0)))
+		self.num_labeled = defaultdict(lambda: 0)
+		self.num_features = defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: 0)))
 
 	def labels(self):
-		return sorted(self.num_data_labeled.keys())
+		return sorted(self.num_labeled.keys())
 
 	def train(self, data):
 		for datum in data:
 			self.num_data += 1
-			self.num_data_labeled[datum.label] += 1
+			self.num_labeled[datum.label] += 1
 			for i, v in enumerate(datum.features):
-				self.num_feature_values_labeled[i][v][datum.label] += 1
+				self.num_features[i][v][datum.label] += 1
 
 	def classify(self, data):
 		for datum in data:
 			yield Classification(self.classify_features(datum.features), datum.label)
 
 	def classify_features(self, features):
-		# Maximum a posteriori estimation: arg max(P(features|label) for each label)
+		# Maximum a posteriori estimation: arg max(for each label: P(features|label))
 		return max(self.labels(), key=lambda label: self.log_posterior(features, label))
-
-	def log_prior(self, label):
-		# P(label) = # data with label / # data
-		# log P(label) = log # data with label - log # data
-		return log(self.num_data_labeled[label]) - log(self.num_data)
 
 	def log_posterior(self, features, label):
 		# P(label|features) = P(label) * P(features|label) / P(features)
@@ -45,17 +40,33 @@ class NaiveBayesClassifier(object):
 		# (we leave out the evidence value, P(features), since it is constant)
 		return self.log_prior(label) + self.log_likelihood(features, label)
 
+	def log_prior(self, label):
+		# P(label) = # data with label / # data
+		# log P(label) = log # data with label - log # data
+		return log(self.num_labeled[label]) - log(self.num_data)
+
 	def log_likelihood(self, features, label):
-		# P(features|label) = product(P(feature value|label) for each feature)
-		# log P(features|label) = sum(log P(feature value|label) for each feature)
+		# P(features|label) = product(for each feature: P(feature value|label))
+		# log P(features|label) = sum(for each feature: log P(feature value|label))
 		return sum(self.log_feature_likelihood(i, v, label) for i, v in enumerate(features))
 
-	def log_feature_likelihood(self, i, v, label):
+	def log_feature_likelihood(self, feature, value, label):
 		# P(feature value|label) = # data with label where feature has value / # data with label
 		# log P(feature value|label) = log # data with label where feature has value - log # data with label
 		# (we use Laplace smoothing, adding 1 to the numerator and denominator, to handle zero counts;
 		# this avoids errors due to log(0) being undefined)
-		return log1p(self.num_feature_values_labeled[i][v][label]) - log1p(self.num_data_labeled[label])
+		return log1p(self.num_features[feature][value][label]) - log1p(self.num_labeled[label])
+
+	def entropy(self, feature):
+		# H(feature) = -sum(for each feature value: P(value) * log P(value))
+		# P(value) = # feature with value / # feature
+		# log P(value) - log # feature with value - log # feature
+		H = 0
+		for value in self.num_features[feature]:
+			numerator = sum(self.num_features[feature][value].values())
+			if numerator > 0:
+				H += (numer / self.num_data) * (log(numer) - log(self.num_data))
+		return H
 
 def digit_data(label_filename, feature_filename):
 	with open(label_filename, 'r') as label_file, open(feature_filename, 'r') as feature_file:
