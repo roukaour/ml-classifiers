@@ -11,13 +11,21 @@ Classification = namedtuple('Classification', ['predicted', 'true'])
 
 class NaiveBayesClassifier(object):
 
+	# 577 out of 784 features have at least this much entropy
+	# (the ones with less have 0 entropy -- they do not vary among the training data)
+	min_feature_entropy = 0.01
+
 	def __init__(self):
 		self.num_instances = 0
 		self.label_num = defaultdict(lambda: 0)
 		self.fvl_num = defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: 0)))
+		self.feature_entropy = defaultdict(lambda: 0)
 
 	def labels(self):
 		return sorted(self.label_num.keys())
+
+	def features(self):
+		return sorted(self.fvl_num.keys())
 
 	def train(self, instances):
 		for instance in instances:
@@ -48,7 +56,8 @@ class NaiveBayesClassifier(object):
 	def log_likelihood(self, features, label):
 		# P(features|label) = product(for each feature: P(feature value|label))
 		# log P(features|label) = sum(for each feature: log P(feature value|label))
-		return sum(self.log_feature_likelihood(f, v, label) for f, v in enumerate(features))
+		return sum(self.log_feature_likelihood(f, v, label) for f, v in enumerate(features)
+			if self.entropy(f) > self.min_feature_entropy)
 
 	def log_feature_likelihood(self, feature, value, label):
 		# P(feature value|label) = # instances with label where feature has value / # instances with label
@@ -58,14 +67,17 @@ class NaiveBayesClassifier(object):
 		return log1p(self.fvl_num[feature][value][label]) - log1p(self.label_num[label])
 
 	def entropy(self, feature):
+		if feature in self.feature_entropy:
+			return self.feature_entropy[feature]
 		# H(feature) = -sum(for each feature value: P(value) * log P(value))
 		# P(value) = # feature with value / # feature
 		# log P(value) - log # feature with value - log # feature
 		H = 0
 		for value in self.fvl_num[feature]:
-			numerator = sum(self.fvl_num[feature][value].values())
-			if numerator > 0:
-				H += (numer / self.num_instances) * (log(numer) - log(self.num_instances))
+			fv_total = sum(self.fvl_num[feature][value].values())
+			if fv_total > 0:
+				H -= (fv_total / self.num_instances) * (log(fv_total) - log(self.num_instances))
+		self.feature_entropy[feature] = H
 		return H
 
 def digit_instances(label_filename, feature_filename):
