@@ -13,18 +13,18 @@ class NaiveBayesClassifier(object):
 
 	def __init__(self):
 		self.num_instances = 0
-		self.num_labeled = defaultdict(lambda: 0)
-		self.num_features = defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: 0)))
+		self.label_num = defaultdict(lambda: 0)
+		self.fvl_num = defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: 0)))
 
 	def labels(self):
-		return sorted(self.num_labeled.keys())
+		return sorted(self.label_num.keys())
 
 	def train(self, instances):
 		for instance in instances:
 			self.num_instances += 1
-			self.num_labeled[instance.label] += 1
-			for i, v in enumerate(instance.features):
-				self.num_features[i][v][instance.label] += 1
+			self.label_num[instance.label] += 1
+			for f, v in enumerate(instance.features):
+				self.fvl_num[f][v][instance.label] += 1
 
 	def classify(self, instances):
 		for instance in instances:
@@ -43,27 +43,27 @@ class NaiveBayesClassifier(object):
 	def log_prior(self, label):
 		# P(label) = # instances with label / # instances
 		# log P(label) = log # instances with label - log # instances
-		return log(self.num_labeled[label]) - log(self.num_instances)
+		return log(self.label_num[label]) - log(self.num_instances)
 
 	def log_likelihood(self, features, label):
 		# P(features|label) = product(for each feature: P(feature value|label))
 		# log P(features|label) = sum(for each feature: log P(feature value|label))
-		return sum(self.log_feature_likelihood(i, v, label) for i, v in enumerate(features))
+		return sum(self.log_feature_likelihood(f, v, label) for f, v in enumerate(features))
 
 	def log_feature_likelihood(self, feature, value, label):
 		# P(feature value|label) = # instances with label where feature has value / # instances with label
 		# log P(feature value|label) = log # instances with label where feature has value - log # instances with label
 		# (we use Laplace smoothing, adding 1 to the numerator and denominator, to handle zero counts;
 		# this avoids errors due to log(0) being undefined)
-		return log1p(self.num_features[feature][value][label]) - log1p(self.num_labeled[label])
+		return log1p(self.fvl_num[feature][value][label]) - log1p(self.label_num[label])
 
 	def entropy(self, feature):
 		# H(feature) = -sum(for each feature value: P(value) * log P(value))
 		# P(value) = # feature with value / # feature
 		# log P(value) - log # feature with value - log # feature
 		H = 0
-		for value in self.num_features[feature]:
-			numerator = sum(self.num_features[feature][value].values())
+		for value in self.fvl_num[feature]:
+			numerator = sum(self.fvl_num[feature][value].values())
 			if numerator > 0:
 				H += (numer / self.num_instances) * (log(numer) - log(self.num_instances))
 		return H
