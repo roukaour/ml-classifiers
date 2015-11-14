@@ -5,30 +5,30 @@ from __future__ import print_function, division
 from collections import namedtuple, defaultdict
 from math import log, log1p
 
-Datum = namedtuple('Datum', ['label', 'features'])
+Instance = namedtuple('Instance', ['label', 'features'])
 
 Classification = namedtuple('Classification', ['predicted', 'true'])
 
 class NaiveBayesClassifier(object):
 
 	def __init__(self):
-		self.num_data = 0
+		self.num_instances = 0
 		self.num_labeled = defaultdict(lambda: 0)
 		self.num_features = defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: 0)))
 
 	def labels(self):
 		return sorted(self.num_labeled.keys())
 
-	def train(self, data):
-		for datum in data:
-			self.num_data += 1
-			self.num_labeled[datum.label] += 1
-			for i, v in enumerate(datum.features):
-				self.num_features[i][v][datum.label] += 1
+	def train(self, instances):
+		for instance in instances:
+			self.num_instances += 1
+			self.num_labeled[instance.label] += 1
+			for i, v in enumerate(instance.features):
+				self.num_features[i][v][instance.label] += 1
 
-	def classify(self, data):
-		for datum in data:
-			yield Classification(self.classify_features(datum.features), datum.label)
+	def classify(self, instances):
+		for instance in instances:
+			yield Classification(self.classify_features(instance.features), instance.label)
 
 	def classify_features(self, features):
 		# Maximum a posteriori estimation: arg max(for each label: P(features|label))
@@ -41,9 +41,9 @@ class NaiveBayesClassifier(object):
 		return self.log_prior(label) + self.log_likelihood(features, label)
 
 	def log_prior(self, label):
-		# P(label) = # data with label / # data
-		# log P(label) = log # data with label - log # data
-		return log(self.num_labeled[label]) - log(self.num_data)
+		# P(label) = # instances with label / # instances
+		# log P(label) = log # instances with label - log # instances
+		return log(self.num_labeled[label]) - log(self.num_instances)
 
 	def log_likelihood(self, features, label):
 		# P(features|label) = product(for each feature: P(feature value|label))
@@ -51,8 +51,8 @@ class NaiveBayesClassifier(object):
 		return sum(self.log_feature_likelihood(i, v, label) for i, v in enumerate(features))
 
 	def log_feature_likelihood(self, feature, value, label):
-		# P(feature value|label) = # data with label where feature has value / # data with label
-		# log P(feature value|label) = log # data with label where feature has value - log # data with label
+		# P(feature value|label) = # instances with label where feature has value / # instances with label
+		# log P(feature value|label) = log # instances with label where feature has value - log # instances with label
 		# (we use Laplace smoothing, adding 1 to the numerator and denominator, to handle zero counts;
 		# this avoids errors due to log(0) being undefined)
 		return log1p(self.num_features[feature][value][label]) - log1p(self.num_labeled[label])
@@ -65,10 +65,10 @@ class NaiveBayesClassifier(object):
 		for value in self.num_features[feature]:
 			numerator = sum(self.num_features[feature][value].values())
 			if numerator > 0:
-				H += (numer / self.num_data) * (log(numer) - log(self.num_data))
+				H += (numer / self.num_instances) * (log(numer) - log(self.num_instances))
 		return H
 
-def digit_data(label_filename, feature_filename):
+def digit_instances(label_filename, feature_filename):
 	with open(label_filename, 'r') as label_file, open(feature_filename, 'r') as feature_file:
 		for label_line in label_file:
 			label = int(label_line)
@@ -79,17 +79,17 @@ def digit_data(label_filename, feature_filename):
 			features = ''.join(feature_lines)
 			assert len(features) == 28 * 28
 			assert set(features).issubset({' ', '+', '#'})
-			yield Datum(label, features)
+			yield Instance(label, features)
 
 def main():
 	# Train naive Bayes classifier on training data
 	nbc = NaiveBayesClassifier()
-	training_data = digit_data('traininglabels.txt', 'trainingimages.txt')
+	training_data = digit_instances('traininglabels.txt', 'trainingimages.txt')
 	nbc.train(training_data)
 	assert len(nbc.labels()) == 10
 
 	# Classify test data, output classifications, and build a confusion matrix
-	test_data = digit_data('testlabels.txt', 'testimages.txt')
+	test_data = digit_instances('testlabels.txt', 'testimages.txt')
 	confusion_matrix = [[0] * 10 for _ in range(10)]
 	with open('predictedlabels.txt', 'w') as prediction_file:
 		for result in nbc.classify(test_data):
