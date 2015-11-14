@@ -95,7 +95,9 @@ def main():
 		row.append(row[i] / row[-1])
 	# Calculate sensitivity scores
 	confusion_matrix.append([confusion_matrix[i][i] / confusion_matrix[-1][i]
-		for i in range(len(confusion_matrix[0]) - 1)] + [''])
+		for i in range(len(confusion_matrix[0]) - 1)])
+	# Calculate number of correct predictions
+	confusion_matrix[-1].append(sum(confusion_matrix[i][i] for i in range(len(nbc.labels()))))
 	# Add row labels
 	for i, label in enumerate(nbc.labels()):
 		confusion_matrix[i].append(label)
