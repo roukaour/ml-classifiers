@@ -16,7 +16,7 @@ class NaiveBayesClassifier(object):
 	min_feature_entropy = 0.001
 
 	# Parameter used for Laplace smoothing of feature value likelihoods
-	laplace_smoothing_value = 1
+	laplace_smoothing_value = 0.001
 
 	def __init__(self):
 		self.num_instances = 0
