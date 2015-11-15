@@ -3,7 +3,7 @@
 from __future__ import print_function, division
 
 from collections import namedtuple, defaultdict
-from math import log, log1p
+from math import log
 
 Instance = namedtuple('Instance', ['label', 'features'])
 
@@ -14,6 +14,9 @@ class NaiveBayesClassifier(object):
 	# 577 out of 784 features have at least this much entropy
 	# (the ones with less have 0 entropy -- they do not vary among the training data)
 	min_feature_entropy = 0.01
+
+	# Parameter used for Laplace smoothing of feature value likelihoods
+	laplace_smoothing_value = 1
 
 	def __init__(self):
 		self.num_instances = 0
@@ -62,9 +65,9 @@ class NaiveBayesClassifier(object):
 	def log_feature_likelihood(self, feature, value, label):
 		# P(feature value|label) = # instances with label where feature has value / # instances with label
 		# log P(feature value|label) = log # instances with label where feature has value - log # instances with label
-		# (we use Laplace smoothing, adding 1 to the numerator and denominator, to handle zero counts;
-		# this avoids errors due to log(0) being undefined)
-		return log1p(self.fvl_num[feature][value][label]) - log1p(self.label_num[label])
+		# (we use Laplace smoothing to handle zero counts, necessary since log(0) is undefined)
+		return (log(self.fvl_num[feature][value][label] + self.laplace_smoothing_value) -
+			log(self.label_num[label] + self.laplace_smoothing_value * 3)
 
 	def entropy(self, feature):
 		if feature in self.feature_entropy:
