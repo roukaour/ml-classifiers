@@ -16,12 +16,13 @@ class NaiveBayesClassifier(object):
 	min_feature_entropy = 0.001
 
 	# Parameter used for Laplace smoothing of feature value likelihoods
-	laplace_smoothing_value = 0.001
+	smoothing_value = 0.001
 
 	def __init__(self):
 		self.num_instances = 0
 		self.label_num = defaultdict(lambda: 0)
 		self.fvl_num = defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: 0)))
+		self.feature_values = defaultdict(lambda: set())
 		self.feature_entropy = defaultdict(lambda: 0)
 
 	def labels(self):
@@ -36,6 +37,7 @@ class NaiveBayesClassifier(object):
 			self.label_num[instance.label] += 1
 			for f, v in enumerate(instance.features):
 				self.fvl_num[f][v][instance.label] += 1
+				self.feature_values[f].add(v)
 
 	def classify(self, instances):
 		for instance in instances:
@@ -66,15 +68,15 @@ class NaiveBayesClassifier(object):
 		# P(feature value|label) = # instances with label where feature has value / # instances with label
 		# log P(feature value|label) = log # instances with label where feature has value - log # instances with label
 		# (we use Laplace smoothing to handle zero counts, necessary since log(0) is undefined)
-		return (log(self.fvl_num[feature][value][label] + self.laplace_smoothing_value) -
-			log(self.label_num[label] + self.laplace_smoothing_value * 3))
+		return (log(self.fvl_num[feature][value][label] + self.smoothing_value) -
+			log(self.label_num[label] + self.smoothing_value * len(self.feature_values[feature])))
 
 	def entropy(self, feature):
 		if feature in self.feature_entropy:
 			return self.feature_entropy[feature]
 		# H(feature) = -sum(for each feature value: P(value) * log P(value))
 		# P(value) = # feature with value / # feature
-		# log P(value) - log # feature with value - log # feature
+		# log P(value) = log # feature with value - log # feature
 		H = 0
 		for value in self.fvl_num[feature]:
 			fv_total = sum(self.fvl_num[feature][value].values())
