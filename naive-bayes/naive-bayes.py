@@ -11,9 +11,9 @@ Classification = namedtuple('Classification', ['predicted', 'true'])
 
 class NaiveBayesClassifier(object):
 
-	# 577 out of 784 features have at least this much entropy
-	# (the ones with less have 0 entropy -- they do not vary among the training data)
-	min_feature_entropy = 0.01
+	# 207 out of 784 features have 0 entropy (they do not vary among the training data)
+	# The other 577 features have more than 0.001 entropy
+	min_feature_entropy = 0.001
 
 	# Parameter used for Laplace smoothing of feature value likelihoods
 	laplace_smoothing_value = 1
@@ -67,7 +67,7 @@ class NaiveBayesClassifier(object):
 		# log P(feature value|label) = log # instances with label where feature has value - log # instances with label
 		# (we use Laplace smoothing to handle zero counts, necessary since log(0) is undefined)
 		return (log(self.fvl_num[feature][value][label] + self.laplace_smoothing_value) -
-			log(self.label_num[label] + self.laplace_smoothing_value * 3)
+			log(self.label_num[label] + self.laplace_smoothing_value * 3))
 
 	def entropy(self, feature):
 		if feature in self.feature_entropy:
