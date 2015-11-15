@@ -11,9 +11,7 @@ Classification = namedtuple('Classification', ['predicted', 'true'])
 
 class NaiveBayesClassifier(object):
 
-	# 207 out of 784 features have 0 entropy (they do not vary among the training data)
-	# The other 577 features have more than 0.001 entropy
-	min_feature_entropy = 0.001
+	min_feature_entropy = 0.1
 
 	# Parameter used for Laplace smoothing of feature value likelihoods
 	smoothing_value = 0.001
@@ -85,17 +83,22 @@ class NaiveBayesClassifier(object):
 		self.feature_entropy[feature] = H
 		return H
 
+def chunk(s, n):
+	return zip(*[iter(s)] * n)
+
 def digit_instances(label_filename, feature_filename):
 	with open(label_filename, 'r') as label_file, open(feature_filename, 'r') as feature_file:
 		for label_line in label_file:
 			label = int(label_line)
-			feature_lines = []
-			for _ in range(28):
-				feature_line = feature_file.readline().rstrip('\n')
-				feature_lines.append(feature_line)
-			features = ''.join(feature_lines)
-			assert len(features) == 28 * 28
-			assert set(features).issubset({' ', '+', '#'})
+			features = []
+			for _ in range(14):
+				# Use 2x2 groups of pixels as features
+				feature_line1 = feature_file.readline().rstrip('\n')
+				feature_line2 = feature_file.readline().rstrip('\n')
+				for feature in chunk(zip(feature_line1, feature_line2), 2):
+					feature = ''.join(sum(zip(*feature), ()))
+					features.append(feature)
+			assert len(features) == 14 * 14
 			yield Instance(label, features)
 
 def main():
