@@ -4,6 +4,7 @@ from __future__ import print_function, division
 
 from collections import namedtuple, defaultdict
 from math import log
+from itertools import product
 
 Instance = namedtuple('Instance', ['label', 'features'])
 
@@ -83,21 +84,15 @@ class NaiveBayesClassifier(object):
 		self.feature_entropy[feature] = H
 		return H
 
-def chunk(s, n):
-	return zip(*[iter(s)] * n)
-
 def digit_instances(label_filename, feature_filename):
 	with open(label_filename, 'r') as label_file, open(feature_filename, 'r') as feature_file:
 		for label_line in label_file:
 			label = int(label_line)
 			features = []
-			for _ in range(14):
-				# Use 2x2 groups of pixels as features
-				feature_line1 = feature_file.readline().rstrip('\n')
-				feature_line2 = feature_file.readline().rstrip('\n')
-				for feature in chunk(zip(feature_line1, feature_line2), 2):
-					feature = ''.join(sum(zip(*feature), ()))
-					features.append(feature)
+			image = [tuple(feature_file.readline().rstrip('\n')) for _ in range(28)]
+			for i, j in product(range(14), range(14)):
+				feature = image[i*2][j*2:j*2+2] + image[i*2+1][j*2:j*2+2]
+				features.append(feature)
 			assert len(features) == 14 * 14
 			yield Instance(label, features)
 
