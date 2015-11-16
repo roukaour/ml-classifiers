@@ -25,10 +25,10 @@ class NaiveBayesClassifier(object):
 		self.feature_entropy = defaultdict(lambda: 0)
 
 	def labels(self):
-		return sorted(self.label_num.keys())
+		return list(sorted(self.label_num.keys()))
 
 	def features(self):
-		return sorted(self.fvl_num.keys())
+		return list(sorted(self.fvl_num.keys()))
 
 	def train(self, instances):
 		for instance in instances:
@@ -96,52 +96,48 @@ def digit_instances(label_filename, feature_filename):
 			assert len(features) == 14 * 14
 			yield Instance(label, features)
 
+def build_confusion_matrix(data, labels):
+	n = len(labels)
+	# Initialize confusion matrix
+	cm = [[''] * (n + 3) for _ in range(n + 3)]
+	# Add row and column headers
+	cm[0][0] = 'pred\\true'
+	cm[0][-2] = cm[-2][0] = 'total'
+	cm[0][-1] = 'precision'
+	cm[-1][0] = 'sensitivity'
+	# Add label headers
+	for i, label in enumerate(labels):
+		cm[0][i+1] = cm[i+1][0] = label
+	# Add data
+	for (i, li), (j, lj) in product(enumerate(labels), enumerate(labels)):
+		cm[i+1][j+1] = data[li][lj]
+	# Calculate totals, precision, and sensitivity scores
+	for i in range(n):
+		cm[i+1][-2] = sum(cm[i+1][1:-2]) # row total
+		cm[i+1][-1] = cm[i+1][i+1] / cm[i+1][-2] # precision
+		cm[-2][i+1] = sum(cm[j+1][i+1] for j in range(n)) # column total
+		cm[-1][i+1] = cm[i+1][i+1] / cm[-2][i+1] # sensitivity
+	# Calculate accuracy
+	cm[-2][-2] = sum(cm[-2][1:-2]) # total instances
+	cm[-1][-1] = sum(cm[i+1][i+1] for i in range(n)) # correct predictions
+	return cm
+
 def main():
 	# Train naive Bayes classifier on training data
 	nbc = NaiveBayesClassifier()
 	training_data = digit_instances('traininglabels.txt', 'trainingimages.txt')
 	nbc.train(training_data)
 	assert len(nbc.labels()) == 10
-
-	# Classify test data, output classifications, and build a confusion matrix
+	# Classify test data and output classifications to a file
 	test_data = digit_instances('testlabels.txt', 'testimages.txt')
-	confusion_matrix = [[0] * 10 for _ in range(10)]
+	n = len(nbc.labels())
+	results = defaultdict(lambda: defaultdict(lambda: 0))
 	with open('predictedlabels.txt', 'w') as prediction_file:
 		for result in nbc.classify(test_data):
-			confusion_matrix[result.predicted][result.true] += 1
+			results[result.predicted][result.true] += 1
 			prediction_file.write('%d\n' % result.predicted)
-
-	# Calculate row totals
-	for row in confusion_matrix:
-		row.append(sum(row))
-	# Calculate column totals
-	confusion_matrix.append([sum(zip(*confusion_matrix)[i]) for i in range(len(confusion_matrix[0]))])
-	# Calculate precision scores
-	for i, row in enumerate(confusion_matrix):
-		row.append(row[i] / row[-1])
-	# Calculate sensitivity scores
-	confusion_matrix.append([confusion_matrix[i][i] / confusion_matrix[-1][i]
-		for i in range(len(confusion_matrix[0]) - 1)])
-	# Calculate number of correct predictions
-	confusion_matrix[-1].append(sum(confusion_matrix[i][i] for i in range(len(nbc.labels()))))
-	# Add row labels
-	for i, label in enumerate(nbc.labels()):
-		confusion_matrix[i].append(label)
-	# Add column labels
-	confusion_matrix.append(list(nbc.labels()))
-	# Add row and column total labels
-	confusion_matrix[-3].append('total')
-	confusion_matrix[-1].append('total')
-	# Add precision and sensitivity labels
-	confusion_matrix[-1].append('precision')
-	confusion_matrix[-2].append('sensitivity')
-	# Add overall axis label
-	confusion_matrix[-1].append('pred\\true')
-	# Move labels to top and left, not bottom and right
-	for row in confusion_matrix:
-		row.insert(0, row.pop())
-	confusion_matrix.insert(0, confusion_matrix.pop())
-
+	# Build a confusion matrix from the classifications
+	confusion_matrix = build_confusion_matrix(results, nbc.labels())
 	# Output confusion matrix
 	for row in confusion_matrix:
 		print(*row, sep='\t')
