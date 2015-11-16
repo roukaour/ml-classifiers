@@ -106,6 +106,7 @@ def build_confusion_matrix(data, labels):
 	cm[0][-2] = cm[-2][0] = 'total'
 	cm[0][-1] = 'precision'
 	cm[-1][0] = 'sensitivity'
+	cm[-2][-1] = 'accuracy'
 	# Add label headers
 	for i, label in enumerate(labels):
 		cm[0][i+1] = cm[i+1][0] = label
@@ -120,7 +121,8 @@ def build_confusion_matrix(data, labels):
 		cm[-1][i+1] = cm[i+1][i+1] / cm[-2][i+1] # sensitivity
 	# Calculate accuracy
 	cm[-2][-2] = sum(cm[-2][1:-2]) # total instances
-	cm[-1][-1] = sum(cm[i+1][i+1] for i in range(n)) # correct predictions
+	cm[-1][-2] = sum(cm[i+1][i+1] for i in range(n)) # correct predictions
+	cm[-1][-1] = cm[-1][-2] / cm[-2][-2] # accuracy
 	return cm
 
 def main():
