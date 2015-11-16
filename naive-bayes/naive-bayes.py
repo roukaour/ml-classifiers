@@ -91,6 +91,7 @@ def digit_instances(label_filename, feature_filename):
 			label = int(label_line)
 			features = []
 			image = [tuple(feature_file.readline().rstrip('\n')) for _ in range(28)]
+			# User overlapping 2x2 pixel blocks as features
 			for i, j in product(range(27), range(27)):
 				feature = image[i][j:j+2] + image[i+1][j:j+2]
 				features.append(feature)
