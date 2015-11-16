@@ -131,7 +131,6 @@ def main():
 	assert len(nbc.labels()) == 10
 	# Classify test data and output classifications to a file
 	test_data = digit_instances('testlabels.txt', 'testimages.txt')
-	n = len(nbc.labels())
 	results = defaultdict(lambda: defaultdict(lambda: 0))
 	with open('predictedlabels.txt', 'w') as prediction_file:
 		for result in nbc.classify(test_data):
