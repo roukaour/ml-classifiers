@@ -13,7 +13,7 @@ Classification = namedtuple('Classification', ['predicted', 'true'])
 class NaiveBayesClassifier(object):
 
 	# Entropy threshold for feature selection
-	min_feature_entropy = 0.25
+	min_entropy = 0.28
 
 	# Parameter used for Laplace smoothing of feature value likelihoods
 	smoothing_value = 0.001
@@ -62,7 +62,7 @@ class NaiveBayesClassifier(object):
 		# P(features|label) = product(for each feature: P(feature value|label))
 		# log P(features|label) = sum(for each feature: log P(feature value|label))
 		return sum(self.log_feature_likelihood(f, v, label) for f, v in enumerate(features)
-			if self.entropy(f) > self.min_feature_entropy)
+			if self.entropy(f) > self.min_entropy)
 
 	def log_feature_likelihood(self, feature, value, label):
 		# P(feature value|label) = # instances with label where feature has value / # instances with label
