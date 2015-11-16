@@ -85,17 +85,39 @@ class NaiveBayesClassifier(object):
 		self.feature_entropy[feature] = H
 		return H
 
+def num_regions(image):
+	def visit(visited, i, j, bg):
+		if (not (0 <= i < 28) or not (0 <= j < 28) or (image[i][j] == ' ') != bg or visited[i][j]):
+			return
+		visited[i][j] = True
+		visit(visited, i, j-1, bg)
+		visit(visited, i, j+1, bg)
+		visit(visited, i-1, j, bg)
+		visit(visited, i+1, j, bg)
+		visit(visited, i-1, j-1, bg)
+		visit(visited, i-1, j+1, bg)
+		visit(visited, i+1, j-1, bg)
+		visit(visited, i+1, j+1, bg)
+	visited = [[False] * 28 for _ in range(28)]
+	n = 0
+	for i, j in product(range(28), range(28)):
+		if not visited[i][j]:
+			n += 1
+			visit(visited, i, j, image[i][j] == ' ')
+	return n
+
 def digit_instances(label_filename, feature_filename):
 	with open(label_filename, 'r') as label_file, open(feature_filename, 'r') as feature_file:
 		for label_line in label_file:
 			label = int(label_line)
-			features = []
 			image = [tuple(feature_file.readline().rstrip('\n')) for _ in range(28)]
+			# Use the number of contiguous regions as a feature
+			features = [num_regions(image)]
 			# User overlapping 2x2 pixel blocks as features
 			for i, j in product(range(27), range(27)):
 				feature = image[i][j:j+2] + image[i+1][j:j+2]
 				features.append(feature)
-			assert len(features) == 27 * 27
+			assert len(features) == 27 * 27 + 1
 			yield Instance(label, features)
 
 def build_confusion_matrix(data, labels):
