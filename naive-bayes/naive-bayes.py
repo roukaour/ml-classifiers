@@ -12,7 +12,8 @@ Classification = namedtuple('Classification', ['predicted', 'true'])
 
 class NaiveBayesClassifier(object):
 
-	min_feature_entropy = 0.1
+	# Entropy threshold for feature selection
+	min_feature_entropy = 0.25
 
 	# Parameter used for Laplace smoothing of feature value likelihoods
 	smoothing_value = 0.001
@@ -90,10 +91,10 @@ def digit_instances(label_filename, feature_filename):
 			label = int(label_line)
 			features = []
 			image = [tuple(feature_file.readline().rstrip('\n')) for _ in range(28)]
-			for i, j in product(range(14), range(14)):
-				feature = image[i*2][j*2:j*2+2] + image[i*2+1][j*2:j*2+2]
+			for i, j in product(range(27), range(27)):
+				feature = image[i][j:j+2] + image[i+1][j:j+2]
 				features.append(feature)
-			assert len(features) == 14 * 14
+			assert len(features) == 27 * 27
 			yield Instance(label, features)
 
 def build_confusion_matrix(data, labels):
