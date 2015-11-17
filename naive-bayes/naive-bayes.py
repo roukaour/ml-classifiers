@@ -125,19 +125,30 @@ def horizontal_bias(image):
 	left, right = sum(mirror[:IMAGE_SIZE//2], ()), sum(mirror[IMAGE_SIZE//2:], ())
 	return left.count(IMAGE_BG) - right.count(IMAGE_BG)
 
+def side_bias(image):
+	return (vertical_bias(image), horizontal_bias(image))
+
+def spread_ratio(image):
+	# Return the ratio of horizontal to vertical foreground spread
+	hds, vds = [], []
+	for i, j in product(range(IMAGE_SIZE), range(IMAGE_SIZE)):
+		if image[i][j] != IMAGE_BG:
+			hds.append(abs(i - IMAGE_SIZE / 2))
+			vds.append(abs(j - IMAGE_SIZE / 2))
+	return int(round(sum(hds) / sum(vds)))
+
 def digit_instances(label_filename, feature_filename):
 	with open(label_filename, 'r') as label_file, open(feature_filename, 'r') as feature_file:
 		for label_line in label_file:
 			label = int(label_line)
 			image = [tuple(feature_file.readline().rstrip('\n')) for _ in range(IMAGE_SIZE)]
-			# Use the number of contiguous regions as a feature
-			# Use the pair of vertical and horizontal bias as a feature
-			features = [num_regions(image), (vertical_bias(image), horizontal_bias(image))]
+			# Use some holistic quantities as features
+			features = [num_regions(image), side_bias(image), spread_ratio(image)]
 			# Use overlapping 2x2 pixel blocks as features
 			for i, j in product(range(IMAGE_SIZE-1), range(IMAGE_SIZE-1)):
 				feature = image[i][j:j+2] + image[i+1][j:j+2]
 				features.append(feature)
-			assert len(features) == (IMAGE_SIZE - 1)**2 + 2
+			assert len(features) == (IMAGE_SIZE - 1)**2 + 3
 			yield Instance(label, features)
 
 def build_confusion_matrix(data, labels):
