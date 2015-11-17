@@ -85,10 +85,17 @@ class NaiveBayesClassifier(object):
 		self.feature_entropy[feature] = H
 		return H
 
+# The width and height of an image
+IMAGE_SIZE = 28
+
+# The background pixel character for images
+IMAGE_BG = ' '
+
 def num_regions(image):
 	# Count the contiguous foreground/background regions in an image
 	def visit(visited, i, j, bg):
-		if (not (0 <= i < 28) or not (0 <= j < 28) or (image[i][j] == ' ') != bg or visited[i][j]):
+		if (not (0 <= i < IMAGE_SIZE) or not (0 <= j < IMAGE_SIZE) or
+			(image[i][j] == IMAGE_BG) != bg or visited[i][j]):
 			return
 		visited[i][j] = True
 		visit(visited, i, j-1, bg)
@@ -99,38 +106,38 @@ def num_regions(image):
 		visit(visited, i-1, j+1, bg)
 		visit(visited, i+1, j-1, bg)
 		visit(visited, i+1, j+1, bg)
-	visited = [[False] * 28 for _ in range(28)]
+	visited = [[False] * IMAGE_SIZE for _ in range(IMAGE_SIZE)]
 	n = 0
-	for i, j in product(range(28), range(28)):
+	for i, j in product(range(IMAGE_SIZE), range(IMAGE_SIZE)):
 		if not visited[i][j]:
 			n += 1
-			visit(visited, i, j, image[i][j] == ' ')
+			visit(visited, i, j, image[i][j] == IMAGE_BG)
 	return n
 
 def vertical_bias(image):
 	# Return the difference between the top and bottom background areas in an image
-	top, bottom = sum(image[:14], ()), sum(image[14:], ())
-	return top.count(' ') - bottom.count(' ')
+	top, bottom = sum(image[:IMAGE_SIZE//2], ()), sum(image[IMAGE_SIZE//2:], ())
+	return top.count(IMAGE_BG) - bottom.count(IMAGE_BG)
 
 def horizontal_bias(image):
 	# Return the difference between the left and right background areas in an image
 	mirror = zip(*image)
-	left, right = sum(mirror[:14], ()), sum(mirror[14:], ())
-	return left.count(' ') - right.count(' ')
+	left, right = sum(mirror[:IMAGE_SIZE//2], ()), sum(mirror[IMAGE_SIZE//2:], ())
+	return left.count(IMAGE_BG) - right.count(IMAGE_BG)
 
 def digit_instances(label_filename, feature_filename):
 	with open(label_filename, 'r') as label_file, open(feature_filename, 'r') as feature_file:
 		for label_line in label_file:
 			label = int(label_line)
-			image = [tuple(feature_file.readline().rstrip('\n')) for _ in range(28)]
+			image = [tuple(feature_file.readline().rstrip('\n')) for _ in range(IMAGE_SIZE)]
 			# Use the number of contiguous regions as a feature
 			# Use the pair of vertical and horizontal bias as a feature
 			features = [num_regions(image), (vertical_bias(image), horizontal_bias(image))]
 			# Use overlapping 2x2 pixel blocks as features
-			for i, j in product(range(27), range(27)):
+			for i, j in product(range(IMAGE_SIZE-1), range(IMAGE_SIZE-1)):
 				feature = image[i][j:j+2] + image[i+1][j:j+2]
 				features.append(feature)
-			assert len(features) == 27 * 27 + 2
+			assert len(features) == (IMAGE_SIZE - 1)**2 + 2
 			yield Instance(label, features)
 
 def build_confusion_matrix(data, labels):
