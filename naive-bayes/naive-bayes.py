@@ -28,9 +28,6 @@ class NaiveBayesClassifier(object):
 	def labels(self):
 		return list(sorted(self.label_num.keys()))
 
-	def features(self):
-		return list(sorted(self.fvl_num.keys()))
-
 	def train(self, instances):
 		for instance in instances:
 			self.num_instances += 1
@@ -125,9 +122,6 @@ def horizontal_bias(image):
 	left, right = sum(mirror[:IMAGE_SIZE//2], ()), sum(mirror[IMAGE_SIZE//2:], ())
 	return left.count(IMAGE_BG) - right.count(IMAGE_BG)
 
-def side_bias(image):
-	return (vertical_bias(image), horizontal_bias(image))
-
 def spread_ratio(image):
 	# Return the ratio of vertical to horizontal foreground spread
 	hds, vds = [], []
@@ -135,7 +129,7 @@ def spread_ratio(image):
 		if image[i][j] != IMAGE_BG:
 			hds.append(abs(i - IMAGE_SIZE / 2))
 			vds.append(abs(j - IMAGE_SIZE / 2))
-	return int(round(sum(vds) / sum(hds)))
+	return sum(vds) // sum(hds)
 
 def digit_instances(label_filename, feature_filename):
 	with open(label_filename, 'r') as label_file, open(feature_filename, 'r') as feature_file:
@@ -143,7 +137,8 @@ def digit_instances(label_filename, feature_filename):
 			label = int(label_line)
 			image = [tuple(feature_file.readline().rstrip('\n')) for _ in range(IMAGE_SIZE)]
 			# Use some holistic quantities as features
-			features = [num_regions(image), side_bias(image), spread_ratio(image)]
+			features = [num_regions(image), spread_ratio(image),
+				(vertical_bias(image), horizontal_bias(image))]
 			# Use overlapping 2x2 pixel blocks as features
 			for i, j in product(range(IMAGE_SIZE-1), range(IMAGE_SIZE-1)):
 				feature = image[i][j:j+2] + image[i+1][j:j+2]
