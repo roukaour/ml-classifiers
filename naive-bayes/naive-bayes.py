@@ -105,6 +105,15 @@ def num_regions(image):
 			visit(visited, i, j, image[i][j] == IMAGE_BG)
 	return n
 
+def spread_ratio(image):
+	# Return the ratio of vertical to horizontal foreground spread
+	hds, vds = [], []
+	for i, j in product(range(IMAGE_SIZE), range(IMAGE_SIZE)):
+		if image[i][j] != IMAGE_BG:
+			hds.append(abs(i - IMAGE_SIZE / 2))
+			vds.append(abs(j - IMAGE_SIZE / 2))
+	return sum(vds) // sum(hds)
+
 def vertical_bias(image):
 	# Return the difference between the top and bottom background areas in an image
 	top, bottom = sum(image[:IMAGE_SIZE//2], ()), sum(image[IMAGE_SIZE//2:], ())
@@ -115,15 +124,6 @@ def horizontal_bias(image):
 	mirror = zip(*image)
 	left, right = sum(mirror[:IMAGE_SIZE//2], ()), sum(mirror[IMAGE_SIZE//2:], ())
 	return left.count(IMAGE_BG) - right.count(IMAGE_BG)
-
-def spread_ratio(image):
-	# Return the ratio of vertical to horizontal foreground spread
-	hds, vds = [], []
-	for i, j in product(range(IMAGE_SIZE), range(IMAGE_SIZE)):
-		if image[i][j] != IMAGE_BG:
-			hds.append(abs(i - IMAGE_SIZE / 2))
-			vds.append(abs(j - IMAGE_SIZE / 2))
-	return sum(vds) // sum(hds)
 
 def digit_instances(label_filename, feature_filename):
 	with open(label_filename, 'r') as label_file, open(feature_filename, 'r') as feature_file:
@@ -137,7 +137,6 @@ def digit_instances(label_filename, feature_filename):
 			for i, j in product(range(IMAGE_SIZE-1), range(IMAGE_SIZE-1)):
 				feature = image[i][j:j+2] + image[i+1][j:j+2]
 				features.append(feature)
-			assert len(features) == (IMAGE_SIZE - 1)**2 + 3
 			yield Instance(label, features)
 
 def build_confusion_matrix(data, labels):
@@ -173,7 +172,6 @@ def main():
 	nbc = NaiveBayesClassifier()
 	training_data = digit_instances('traininglabels.txt', 'trainingimages.txt')
 	nbc.train(training_data)
-	assert len(nbc.labels()) == 10
 	# Classify test data and output classifications to a file
 	test_data = digit_instances('testlabels.txt', 'testimages.txt')
 	classifications = nbc.classify(test_data)
@@ -182,9 +180,8 @@ def main():
 		for result in classifications:
 			results[result.predicted][result.true] += 1
 			prediction_file.write('%d\n' % result.predicted)
-	# Build a confusion matrix from the classifications
+	# Build a confusion matrix from the classifications and output it
 	confusion_matrix = build_confusion_matrix(results, nbc.labels())
-	# Output confusion matrix
 	for row in confusion_matrix:
 		print(*row, sep='\t')
 
