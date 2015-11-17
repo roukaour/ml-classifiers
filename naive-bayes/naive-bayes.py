@@ -91,18 +91,12 @@ IMAGE_BG = ' '
 def num_regions(image):
 	# Count the contiguous foreground/background regions in an image
 	def visit(visited, i, j, bg):
-		if (not (0 <= i < IMAGE_SIZE) or not (0 <= j < IMAGE_SIZE) or
-			(image[i][j] == IMAGE_BG) != bg or visited[i][j]):
-			return
 		visited[i][j] = True
-		visit(visited, i, j-1, bg)
-		visit(visited, i, j+1, bg)
-		visit(visited, i-1, j, bg)
-		visit(visited, i+1, j, bg)
-		visit(visited, i-1, j-1, bg)
-		visit(visited, i-1, j+1, bg)
-		visit(visited, i+1, j-1, bg)
-		visit(visited, i+1, j+1, bg)
+		for di, dj in product([-1, 0, 1], [-1, 0, 1]):
+			i2, j2 = i + di, j + dj
+			if ((i2, j2) != (i, j) and 0 <= i2 < IMAGE_SIZE and 0 <= j2 < IMAGE_SIZE and
+				(image[i2][j2] == IMAGE_BG) == bg and not visited[i2][j2]):
+				visit(visited, i2, j2, bg)
 	visited = [[False] * IMAGE_SIZE for _ in range(IMAGE_SIZE)]
 	n = 0
 	for i, j in product(range(IMAGE_SIZE), range(IMAGE_SIZE)):
