@@ -13,7 +13,7 @@ Classification = namedtuple('Classification', ['predicted', 'true'])
 class NaiveBayesClassifier(object):
 
 	# Entropy threshold for feature selection
-	min_entropy = 0.28
+	min_entropy = 0.15
 
 	# Parameter used for Laplace smoothing of feature value likelihoods
 	smoothing_value = 0.001
@@ -129,13 +129,13 @@ def side_bias(image):
 	return (vertical_bias(image), horizontal_bias(image))
 
 def spread_ratio(image):
-	# Return the ratio of horizontal to vertical foreground spread
+	# Return the ratio of vertical to horizontal foreground spread
 	hds, vds = [], []
 	for i, j in product(range(IMAGE_SIZE), range(IMAGE_SIZE)):
 		if image[i][j] != IMAGE_BG:
 			hds.append(abs(i - IMAGE_SIZE / 2))
 			vds.append(abs(j - IMAGE_SIZE / 2))
-	return int(round(sum(hds) / sum(vds)))
+	return int(round(sum(vds) / sum(hds)))
 
 def digit_instances(label_filename, feature_filename):
 	with open(label_filename, 'r') as label_file, open(feature_filename, 'r') as feature_file:
