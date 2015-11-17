@@ -169,9 +169,10 @@ def main():
 	assert len(nbc.labels()) == 10
 	# Classify test data and output classifications to a file
 	test_data = digit_instances('testlabels.txt', 'testimages.txt')
+	classifications = nbc.classify(test_data)
 	results = defaultdict(lambda: defaultdict(lambda: 0))
 	with open('predictedlabels.txt', 'w') as prediction_file:
-		for result in nbc.classify(test_data):
+		for result in classifications:
 			results[result.predicted][result.true] += 1
 			prediction_file.write('%d\n' % result.predicted)
 	# Build a confusion matrix from the classifications
