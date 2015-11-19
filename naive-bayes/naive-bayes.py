@@ -6,6 +6,8 @@ from collections import namedtuple, defaultdict
 from math import log
 from itertools import product
 
+__author__ = 'Remy Oukaour (107122849)'
+
 Instance = namedtuple('Instance', ['label', 'features'])
 
 Classification = namedtuple('Classification', ['predicted', 'true'])
