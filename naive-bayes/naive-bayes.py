@@ -90,19 +90,18 @@ IMAGE_BG = ' '
 
 def num_regions(image):
 	# Count the contiguous foreground/background regions in an image
-	def visit(visited, i, j, bg):
-		visited[i][j] = True
-		for di, dj in product([-1, 0, 1], [-1, 0, 1]):
-			i2, j2 = i + di, j + dj
-			if ((i2, j2) != (i, j) and 0 <= i2 < IMAGE_SIZE and 0 <= j2 < IMAGE_SIZE and
-				(image[i2][j2] == IMAGE_BG) == bg and not visited[i2][j2]):
-				visit(visited, i2, j2, bg)
-	visited = [[False] * IMAGE_SIZE for _ in range(IMAGE_SIZE)]
+	def flood_fill(filled, i, j, bg):
+		if (0 <= i < IMAGE_SIZE and 0 <= j < IMAGE_SIZE and not filled[i][j] and
+			(image[i][j] == IMAGE_BG) == bg):
+			filled[i][j] = True
+			for di, dj in product([-1, 0, 1], [-1, 0, 1]):
+				flood_fill(filled, i+di, j+dj, bg)
+	filled = [[False] * IMAGE_SIZE for _ in range(IMAGE_SIZE)]
 	n = 0
 	for i, j in product(range(IMAGE_SIZE), range(IMAGE_SIZE)):
-		if not visited[i][j]:
+		if not filled[i][j]:
 			n += 1
-			visit(visited, i, j, image[i][j] == IMAGE_BG)
+			flood_fill(filled, i, j, image[i][j] == IMAGE_BG)
 	return n
 
 def spread_ratio(image):
