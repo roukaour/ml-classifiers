@@ -212,6 +212,7 @@ class Tree:
                 num_diff += 1
             if self.data.tlabel[self.valid_data[i]] != majory_1:
                 num_diff_maj += 1
+
         print 'diff', num_diff, num_diff_maj, 'in', len(self.data.tdata)
         if num_diff > num_diff_maj:
             self.arbitor = majory_1 == 1

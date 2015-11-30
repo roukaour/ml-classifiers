@@ -55,6 +55,16 @@ def split_data(data, label):
     test_label = label[300:]
     return training_data, training_label, test_data, test_label
 
+def get_accuracy(tree, test_data, test_label):
+    pred_label = tree.predict(test_data)
+
+    diff = 0
+    for i in xrange(300):
+        print test_label[i], pred_label[i]
+        if test_label[i] != pred_label[i]:
+            diff += 1
+    return (300-diff) * 1.0 / 300
+
 
 def method1(data, label):
     for i in xrange(15):
@@ -70,19 +80,19 @@ def method1(data, label):
     if True:
         tree = dtree.DecisionTree()
         tree.fit(training_data, training_label, is_continous)
-        pred_label = tree.predict(test_data)
+
+        acc_test = get_accuracy(tree, test_data, test_label)
+        acc = get_accuracy(tree, training_data, training_label)
+
+        print acc_test
+        print acc
     else:
         clf = sklearn.tree.DecisionTreeClassifier()
         clf = clf.fit(training_data, training_label)
         pred_label = clf.predict(test_data)
 
-    diff = 0
-    for i in xrange(300):
-        print test_label[i], pred_label[i]
-        if test_label[i] != pred_label[i]:
-            diff += 1
-    print diff
-    print diff * 1.0 / 300
+        acc = get_accuracy(clf, test_data, test_label)
+        print acc
 
 if __name__ == '__main__':
     data, label = load_data()
