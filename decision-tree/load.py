@@ -2,7 +2,7 @@ __author__ = 'Jian Yang'
 __date__ = '11/12/15'
 
 import copy
-import sklearn.tree
+#import sklearn.tree
 import dtree
 
 is_continous = [1 if x in [1, 2, 7, 10, 13, 14] else 0 for x in xrange(15)]
@@ -77,22 +77,20 @@ def method1(data, label):
 
     training_data, training_label, test_data, test_label = split_data(data, label)
 
-    if True:
-        tree = dtree.DecisionTree()
-        tree.fit(training_data, training_label, is_continous)
+    tree = dtree.DecisionTree()
+    tree.fit(training_data, training_label, is_continous)
 
-        acc_test = get_accuracy(tree, test_data, test_label)
-        acc = get_accuracy(tree, training_data, training_label)
+    acc_test = get_accuracy(tree, test_data, test_label)
+    acc = get_accuracy(tree, training_data, training_label)
 
-        print acc_test
-        print acc
-    else:
-        clf = sklearn.tree.DecisionTreeClassifier()
-        clf = clf.fit(training_data, training_label)
-        pred_label = clf.predict(test_data)
+    print acc_test
+    print acc
+    #clf = sklearn.tree.DecisionTreeClassifier()
+    #clf = clf.fit(training_data, training_label)
+    #pred_label = clf.predict(test_data)
 
-        acc = get_accuracy(clf, test_data, test_label)
-        print acc
+    #acc = get_accuracy(clf, test_data, test_label)
+    #print acc
 
 if __name__ == '__main__':
     data, label = load_data()
