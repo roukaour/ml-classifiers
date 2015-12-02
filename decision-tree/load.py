@@ -2,7 +2,7 @@ __author__ = 'Jian Yang'
 __date__ = '11/12/15'
 
 import copy
-import sklearn.tree
+#import sklearn.tree
 import dtree
 
 import data_smooth
