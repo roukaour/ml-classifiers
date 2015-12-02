@@ -8,7 +8,7 @@ import dtree
 import data_smooth
 from random import shuffle
 
-from sklearn.externals.six import StringIO
+# from sklearn.externals.six import StringIO
 # import pydot
 
 is_continous = [1 if x in [1, 2, 7, 10, 13, 14] else 0 for x in xrange(15)]
@@ -80,7 +80,7 @@ def predict(data, label):
     run_data = [training_data, training_label, test_data, test_label]
 
     acc_train, acc_test = run_method_dtree(run_data)
-    run_method_sklean(run_data)
+    # run_method_sklean(run_data)
     return acc_train, acc_test
 
 def multiple_test(data, label):
