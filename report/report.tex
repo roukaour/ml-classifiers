@@ -30,6 +30,8 @@
 
 \usepackage{graphicx}
 
+\usepackage{amsmath}
+
 \title{CSE 537 Assignment 5 Report: ML Classifiers}
 
 \author{
@@ -59,17 +61,45 @@ worthiness of applicants, and a na{\"i}ve Bayes classifier for classifying
 handwritten digits. In this report, we discuss the implementation details and
 performance of our solutions.
 
-\section{Decision Tree Classifier}
+\section{Decision tree classifier}
 
 Jian Yang developed the decision tree classifier for predicting credit worthiness
 of applicants.
 
 % TODO
 
-\section{Na{\"i}ve Bayes Classifier}
+\section{Na{\"i}ve Bayes classifier}
 
 Remy Oukaour developed the na{\"i}ve Bayes classifier for classifying handwritten
 digits.
+
+\subsection{Instructions}
+
+To run the classifier, enter $python naive-bayes.py$. It will read from
+$trainingimages.txt$, $traininglabels.txt$, $testimages.txt$, and $testlabels.txt$,
+and output to $predictedlabels.txt$ and $confusion-matrix.txt$.
+
+\subsection{Implementation}
+
+The classifier is a straightforward implementation of na{\"i}ve Bayes, using the formula
+``log posterior $\propto$ log prior + log likelihood'':
+
+$$\log P(label|features) \propto \log P(label) + \sum_{feature} P(feature|label)$$
+
+The prior probability $P(label)$ is estimated to be the fraction of training instances
+with a given label (0 to 9). The likelihood of a feature having a certain value for a test
+instance is estimated to be the fraction of training instances with that value for that
+feature. (We use Laplace smoothing to handle novel feature values in the test data,
+with a smoothing value of 0.001.) We then pick the label of each test instance using a
+maximum likelihood estimator:
+
+$$classification(features) = \underset{labels}{\operatorname{argmax}} \ \log P(label|features)$$
+
+\subsection{Feature selection}
+
+\subsection{Parameter tuning}
+
+\subsection{Performance results}
 
 \begin{figure}[h!]
 \centering
