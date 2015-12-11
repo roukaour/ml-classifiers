@@ -82,8 +82,9 @@ and output to $predictedlabels.txt$ and $confusion\text{-}matrix.txt$.
 
 \subsection{Implementation}
 
-The classifier is a straightforward implementation of na{\"i}ve Bayes, using the formula
-``log posterior $\propto$ log prior + log likelihood'':
+The classifier is a straightforward implementation of na{\"i}ve Bayes that supports
+arbitrary multinomial features, using the formula ``log posterior $\propto$ log prior +
+log likelihood'':
 
 $$\log P(label|features) \propto \log P(label) + \sum_{feature} P(feature|label)$$
 
