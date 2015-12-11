@@ -88,11 +88,11 @@ The classifier is a straightforward implementation of na{\"i}ve Bayes, using the
 $$\log P(label|features) \propto \log P(label) + \sum_{feature} P(feature|label)$$
 
 The prior probability $P(label)$ is estimated to be the fraction of training instances
-with a given label (0 to 9). The likelihood of a feature having a certain value for a test
-instance is estimated to be the fraction of training instances with that value for that
-feature. (We use Laplace smoothing to handle novel feature values in the test data,
-with a smoothing value of 0.001.) We then pick the label of each test instance using a
-maximum likelihood estimator:
+with a given label (0 to 9). The likelihood $P(feature|label)$ of a feature having a
+certain value for a test instance is estimated to be the fraction of training instances
+(limited to that label) with that value for that feature. (We use Laplace smoothing to
+handle novel feature values in the test data, with a smoothing value of 0.001.) We then
+pick the label of each test instance using a maximum likelihood estimator:
 
 $$classification(features) = \underset{labels}{\operatorname{argmax}} \ \log P(label|features)$$
 
