@@ -68,6 +68,7 @@ Jian Yang developed the decision tree classifier for predicting credit worthines
 of applicants.
 
 \subsection{Introduction}
+
 To run the classifier, please run $python\ load.py$. It will load the data in $crx.data.txt$,
 and print the result to screen for both the training error and the test error.
 
@@ -92,6 +93,7 @@ split by $1, 2, 3$ and $4$. By picking the most information gain, we could decid
 If in a subset of data the feature has only one value left, we would eliminate the feature in subset of the training data.
 
 \subsection{Data Set}
+
 The data contains unknown values as $"?"$ for both the continuous features and the discrete features. We use a simple smoothing method,
 by choosing the most frequent features of discrete features, and the median of the continuous features. \\
 We prepared all the data first to fill values for unknown values $"?"$. \\
@@ -101,6 +103,7 @@ For training examples, since we need do post-pruning, we splitted the training d
 of training data for training and the second-half of training data for testing.
 
 \subsection{Post-Pruning}
+
 After the building of the tree, we used post-pruning to reduce overfitting. The reason of overfitting is there are errors and noises
 in data. \\
 By post-pruning, we applied the second half training data as validation data to classify based on the tree.
@@ -109,6 +112,7 @@ if using majority of the training data had higher accuracy than the current node
 the majority value directly as the classify rule on this node.
 
 \subsection{Test Result}
+
 Since we randomly split data in every time the script was run, the accuracy is not a fixed number. But in general statistics by running it may times,
 we observed that the training error is around 88\% and the test error is around 86\%. \\
 And the trees before post-pruning is showed in fig \ref{before} and after post-pruning is showed in fig \ref{after}. By comparing them we could see
@@ -116,24 +120,24 @@ several nodes have been pruned.
 
 \begin{figure}[h!]
 \centering
-\includegraphics[height=2.75in, width=6.5in]{before.png}
+\includegraphics[height=1.18in, width=6.5in]{before.png}
 \caption{Decision Tree before pruning.}
 \label{before}
 \end{figure}
 
 \begin{figure}[h!]
 \centering
-\includegraphics[height=2.75in, width=6.5in]{after.png}
+\includegraphics[height=1.875in, width=6.5in]{after.png}
 \caption{Decision Tree after pruning.}
 \label{after}
 \end{figure}
 
-
 As showed in the textbook, we also tested by different sizes of training examples. We used training examples from 10 to 300
 and draw the learning curve for test accuracy and the result is showed in fig \ref{learn}.
+
 \begin{figure}[h!]
 \centering
-\includegraphics[height=4in, width=5in]{learn.png}
+\includegraphics[height=3.75in, width=5in]{learn.png}
 \caption{Learning curve for test accuracy.}
 \label{learn}
 \end{figure}
