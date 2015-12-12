@@ -68,6 +68,7 @@ Jian Yang developed the decision tree classifier for predicting credit worthines
 of applicants.
 
 \subsection{Introduction}
+
 To run the classifier, please run $python\ load.py$. It will load the data in $crx.data.txt$,
 and print the result to screen for both the training error and the test error.
 
@@ -82,22 +83,26 @@ $$H(Y|X) = \sum_jPr(X=v_j)H(Y|X=v_j)$$
 
 $$H(X) = \sum_{1}^m p_j \log_2{p_j} $$
 
-For each feature, we would calculate the Information Gain for each feature. \\
-\subsubsection{Continuous Features}
+For each feature, we would calculate the Information Gain for each feature.
+
+\subsubsection{Continuous features}
+
 What is special is for the continuous features, it doesn't make sense to use each value as a single $v_j$.
 Instead, we use a binary splitting for continuous features, and enumerate all possible split values, from the smallest value
 for this feature to the largest value. \\
 For example, if a feature has values $1, 2, 3, 4$, we would try using value one to split it to two sets of data
 with the values as $1$ and $2, 3, 4$ and calculate the information gain and then split by $1, 2$ and $3, 4$ and then 
 split by $1, 2, 3$ and $4$. By picking the most information gain, we could decide the feature and the related split value.
-If in a subset of data the feature has only one value left, we would eliminate the feature in subset of the training data. \\
-\subsubsection{Discrete Features}
+If in a subset of data the feature has only one value left, we would eliminate the feature in subset of the training data.
+
+\subsubsection{Discrete features}
+
 For discrete features with multiple possible values, we have two choices to build a branch and to calculate the information gain. \\
 One is to consider each value has a single branch, which means when we calculate the $H(Y|X)$, we calculate multiple such entropy values for each value. Another solution is using binary branch, which means we could split the value set to two sets and calculate the entropy for the probability an example is in one set. \\
 In the first condition, the branch for a discrete feature might have as many branches as the number of values, and for the second condition, there should always be binary branches for the discrete features.
 
+\subsection{Data set}
 
-\subsection{Data Set}
 The data contains unknown values as $"?"$ for both the continuous features and the discrete features. We use a simple smoothing method,
 by choosing the most frequent features of discrete features, and the median of the continuous features. \\
 We prepared all the data first to fill values for unknown values $"?"$. \\
@@ -106,7 +111,8 @@ need to shuffle first is, the data might be biased for the feature values and th
 For training examples, since we need do post-pruning, we splitted the training data by half and half. And using the first-half
 of training data for training and the second-half of training data for testing.
 
-\subsection{Post-Pruning}
+\subsection{Post-pruning}
+
 After the building of the tree, we used post-pruning to reduce overfitting. The reason of overfitting is there are errors and noises
 in data. \\
 By post-pruning, we applied the second half training data as validation data to classify based on the tree.
@@ -114,7 +120,8 @@ For every node on the tree, we predicted the results, and also calculate the maj
 if using majority of the training data had higher accuracy than the current node, we would prune this node and its subtrees by using
 the majority value directly as the classify rule on this node.
 
-\subsection{Test Result}
+\subsection{Test results}
+
 Since we randomly split data in every time the script was run, the accuracy is not a fixed number. But in general statistics by running it may times,
 we observed that the training error is around 88\% and the test error is around 86\% for multiple branching of discrete features. And the binary branching of discrete features has similar but a little smaller accuracy around 87\% for the training error and 86\% for test error.\\
 And the trees with multiple branching of discrete features before post-pruning is showed in fig \ref{before} and after post-pruning is showed in fig \ref{after}. By comparing them we could see
@@ -122,21 +129,22 @@ several nodes have been pruned.
 
 \begin{figure}[h!]
 \centering
-\includegraphics[height=1.18in, width=6.5in]{before.png}
-\caption{Decision Tree with multiple branching for discrete features before pruning. ($X[i]$ is feature $A_i$)} 
+\hspace*{-0.5in}
+\includegraphics[height=1.362in, width=7.5in]{before.png}
+\caption{Decision Tree with multiple branching for discrete features before pruning. ($X[i]$ is feature $A_i$.)} 
 \label{before}
 \end{figure}
 
-\begin{figure}[h!]å
+\begin{figure}[h!]
 \centering
 \includegraphics[height=1.875in, width=6.5in]{after.png}
-\caption{Decision Tree with multiple branching for discrete features after pruning. ($X[i]$ is feature $A_i$)}
+\caption{Decision Tree with multiple branching for discrete features after pruning.}
 \label{after}
 \end{figure}
 
-
 As showed in the textbook, we also tested by different sizes of training examples. We used training examples from 10 to 300
 and draw the learning curve for test accuracy and the result is showed in fig \ref{learn}.
+
 \begin{figure}[h!]
 \centering
 \includegraphics[height=3.75in, width=5in]{learn.png}
@@ -148,19 +156,20 @@ The trees with binary branching of discrete features before post-pruning is show
 
 \begin{figure}[h!]
 \centering
-\includegraphics[height=4.8in, width=6.5in]{bin_before.png}
-\caption{Decision Tree with binary branching for discrete features before pruning. ($X[i]$ is feature $A_i$)}
+\includegraphics[height=3.75in, width=5in]{bin_before.png}
+\caption{Decision Tree with binary branching for discrete features before pruning.}
 \label{bin_before}
 \end{figure}
 
 \begin{figure}[h!]
 \centering
-\includegraphics[height=7.62in, width=6.5in]{bin_after.png}
-\caption{Decision Tree with binary branching after pruning. ($X[i]$ is feature $A_i$)}
+\includegraphics[height=3.75in, width=3in]{bin_after.png}
+\caption{Decision Tree with binary branching for discrete features after pruning.}
 \label{bin_after}
 \end{figure}
 
-And if 
+\clearpage
+
 \section{Na{\"i}ve Bayes classifier}
 
 Remy Oukaour developed the na{\"i}ve Bayes classifier for classifying handwritten
@@ -248,6 +257,7 @@ The sensitivity ranged from 81.1\% (for 7) to 95.6\% (for 0). The overall accura
 \begin{table}[h!]
 \centering
 \setlength\tabcolsep{4pt}
+\hspace*{-0.9cm}
 \begin{tabular}{| r | r | r | r | r | r | r | r | r | r | r | r | r |}
 \hline
 \textbf{pred\textbackslash true} & \textbf{0} & \textbf{1} & \textbf{2} & \textbf{3} & \textbf{4} & \textbf{5} & \textbf{6} & \textbf{7} & \textbf{8} & \textbf{9} & \textbf{total} & \textbf{precision} \\
@@ -288,7 +298,7 @@ of the 97 misclassified digits, some are illegible even for humans.
 
 \begin{figure}[h!]
 \centering
-\includegraphics[height=2.75in, width=2.75in]{digits.png}
+\includegraphics[height=3in, width=3in]{digits.png}
 \caption{The 97 digits which the na{\"i}ve Bayes classifier got wrong.}
 \label{nbc_digits}
 \end{figure}
